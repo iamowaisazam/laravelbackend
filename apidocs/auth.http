@@ -1,4 +1,7 @@
-@root = "http://127.0.0.1:8000/api"
+#@root = "http://127.0.0.1:8000/api"
+
+@root = "https://store.irhawears.com/ang/public/api"
+
 
 ###
 # Login Request
