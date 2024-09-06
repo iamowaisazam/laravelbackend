@@ -1,0 +1,41 @@
+@root = "http://127.0.0.1:8000/api"
+
+###
+# Login Request
+###
+POST {{root}}/admin/auth/login
+Content-Type: application/json
+
+{
+    "email": "iamowaisazam4@gmail.com",
+    "password": "owais123"
+}
+
+
+###
+# Register Request
+###
+
+POST {{root}}/admin/auth/register
+Content-Type: application/json
+
+  {
+    "fullname" : "Owais Azam",
+    "email" : "iamowaisazam4@gmail.com",
+    "password" : "owais123",
+    "phone" : "03112239342"
+  }
+
+
+
+###
+# Profile Request
+###
+GET {{root}}/admin/profile
+Authorization: Bearer 2|yVIYlAV3a637mrOsmIYelNJdTD5G9Y2i2xNCh1aFa122399c
+Content-Type: application/json
+
+{
+
+}
+
