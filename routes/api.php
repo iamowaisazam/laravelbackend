@@ -19,6 +19,8 @@ use Illuminate\Support\Facades\Route;
         Route::get('/password-reset-request/{email}','PasswordResetController@password_reset_request');
         Route::get('/password-reset-verify/{code}','PasswordResetController@password_reset_verify');
         Route::post('/password-reset/{id}','PasswordResetController@password_reset');
+
+        Route::get('/users','ProfileController@getUsers');
         
     });
 
@@ -28,6 +30,7 @@ use Illuminate\Support\Facades\Route;
         
         //Profile
         Route::get('/profile','ProfileController@profile')->name('profile');
+        
         Route::get('/logout', 'ProfileController@logout')->name('logout');
 
         //Products Management  

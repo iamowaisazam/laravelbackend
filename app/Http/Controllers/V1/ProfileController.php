@@ -33,4 +33,14 @@ class ProfileController extends Controller
         ],200);
     }
 
+
+    public function getUsers(Request $request)
+    {
+        $users = User::all();
+        return response()->json([
+            'message' => 'Get User Successfully',
+            'data' => $users,
+        ],200);
+    }
+
 }
