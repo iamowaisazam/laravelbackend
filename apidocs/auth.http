@@ -1,6 +1,6 @@
-#@root = "http://127.0.0.1:8000/api"
+@root = "http://localhost/new/public/api"
 
-@root = "https://store.irhawears.com/ang/public/api"
+# @root = "https://store.irhawears.com/ang/public/api"
 
 
 ###

@@ -11,49 +11,26 @@ use Illuminate\Support\Str;
 class PostController extends Controller
 {
 
-    /**
-     * Show the profile for a given user.
-     */
-    public function search(Request $request)
-    { 
-
-        $data = Post::query();
-        if($request->has('search')){
-            $search = $request->search;
-            $data->where('title', 'like', '%'.$search.'%');
-        }
-
-        $data = $data->limit(5)->get();
-        return response()->json([
-           "message" => "Get All Product Successfully",
-           "data" =>  $data,
-        ],200);
-    }
+  
 
 
-
-    /**
+      /**
      * Show the profile for a given user.
      */
     public function index(Request $request)
     { 
         $per_page = 10;
-        $sort_by = 'date';
-        $assending = 'asc';
-   
+        $sort_by = 'asc';
+     
         $data = Post::query();
 
         if($request->has('search')){
             $search = $request->search;
-            $data->where('title', 'like', '%'.$search.'%')
-            ->orWhere('slug', 'like', '%'.$search.'%');
+            $data->where('title', 'like', '%'.$search.'%');
+            // ->orWhere('lang', 'like', '%'.$search.'%');
         }
 
-        if($request->has('ascending') && $request->ascending != ''){
-            $assending = $request->ascending;
-        }
-
-        if($request->has('sort_by') && $request->sort_by != null){
+        if($request->has('sort_by') && $request->sort_by != ''){
             $sort_by = $request->sort_by;
         }
 
@@ -61,52 +38,91 @@ class PostController extends Controller
             $per_page = $request->per_page;
         }
 
-        switch ($sort_by) {
-
-            case 'title':
-                $data->orderBy('title',$assending);
-                break;
-
-            case 'date':
-                $data->orderBy('created_at',$assending);
-                break;
-
-            case 'id':
-                $data->orderBy('id',$assending);
-                break;        
-
-            default:
-
-               $data->orderBy('created_at',$assending);
-            break;
+        if($request->has('order_by') && $request->order_by != null){
+            $data->orderBy($request->order_by,$sort_by);
         }
 
-        $data = $data->with(['unit','category']);
+        // $data->select([
+        //     "id",
+        //     "title",
+        //     "link",
+        //     "short_description",
+        //     "thumbnail",
+        //     "lang",
+        //     "sorting",
+        //     "status",
+        //     "created_by",
+        //     "created_at"
+        // ]);
+
+        $data = $data->paginate($per_page);
 
         return response()->json([
-            'query' => '',
-            "message" => "Get All Product Successfully",
-            "data" =>  $data->paginate($per_page),
+            "status" => "success",
+            "message" => "Get All Records Successfully",
+            "data" =>  $data,
         ],200);
     }
-
-
 
      /*
      * Show the profile for a given user.
      */
-    public function show(Post $product)
-    {       
-        
-         $product->unit;
-         $product->category;
-         
+    public function store(Request $request)
+    {
+
+        $validator = Validator::make($request->all(),
+        [
+            'title' => ['required','max:300'],
+            'title_es' => ['nullable','max:300'],
+            'title_pt' => ['nullable','max:300'],
+            
+            'short_description' => ['nullable','max:300'],
+            'short_description_es' => ['nullable','max:300'],
+            'short_description_pt' => ['nullable','max:300'],
+
+            'long_description' => ['nullable','max:1000'],
+            'long_description_es' => ['nullable','max:1000'],
+            'long_description_pt' => ['nullable','max:1000'],
+
+            'type' => ['required','in:post','max:300'],
+            'sorting' => ['nullable','integer','max:300'],
+            'status' => ['required','integer','max:300'],
+        ]);
+
+        if($validator->fails()){
+            return response()->json([
+                "status" => "error",
+                "message" => "Validation Failed",
+                "errors" =>  $validator->messages(),
+            ],403);
+        }
+
+       $module = Post::create([
+            'title' => $request->title,
+            'slug' => $request->title,
+            'title_es' => $request->title_es,
+            'title_pt' => $request->title_pt,
+            
+            'short_description' => $request->short_description,
+            'short_description_es' => $request->short_description_es,
+            'short_description_pt' => $request->short_description_et,
+
+            'long_description' => $request->long_description,
+            'long_description_es' => $request->long_description_es,
+            'long_description_pt' => $request->long_description_es,
+
+            'type' => $request->type,
+            'sorting' => $request->sorting,
+            'status' => $request->status,
+        ]);
+
         return response()->json([
-            "message" => 'Product Get Successfully',
-            "data" => $product,
+            "message" => "Record Created Successfully",
+            "data" => ['id' => $module->id]
         ],200);
+
+
     }
-    
 
 
     /*
@@ -115,76 +131,59 @@ class PostController extends Controller
     public function update(Request $request,$id)
     {
 
-        if($id == 0){
-            $module = New Post();    
-        }else{
-            $module = Post::where('id',$id)->first();
-            if(!$module){
-                return response()->json(["message" => "Record Not Found"],403);
-            }
+        $module = Post::where('id',$id)->first();
+        if(!$module){
+            return response()->json(["message" => "Record Not Found"],403);
         }
 
-        //-----------Validations
+        $validator = Validator::make($request->all(),
+        [
+            'title' => ['required','max:300'],
+            'title_es' => ['nullable','max:300'],
+            'title_pt' => ['nullable','max:300'],
+            
+            'short_description' => ['nullable','max:300'],
+            'short_description_es' => ['nullable','max:300'],
+            'short_description_pt' => ['nullable','max:300'],
 
-        if(request()->has('slug')){
-            request()->merge(['slug' => Str::slug( request()->slug)]);
-        } 
+            'long_description' => ['nullable','max:1000'],
+            'long_description_es' => ['nullable','max:1000'],
+            'long_description_pt' => ['nullable','max:1000'],
 
+            'type' => ['required','in:post','max:300'],
+            'sorting' => ['nullable','integer','max:300'],
+            'status' => ['required','integer','max:300'],
+        ]);
 
-        $validations = [
-            'title' => ['required','string'],
-            'description' => ['nullable','string'],
-            'short_description' => ['nullable','string'],
-            'price' => ['required','integer'],
-            'image' => ['nullable','image','mimes:jpeg,png,jpg','max:2048'],
-            'images' => ['nullable','image','mimes:jpeg,png,jpg','max:2048'],
-            'category_id' => ['nullable','integer','exists:categories,id'],
-            'unit_id' => ['nullable','integer','exists:units,id'],
-        ];
-
-        if($id == 0){
-            $validations['slug'] = ['required','unique:products,slug'];
-            $validations['sku'] = ['required','string','unique:products,sku'];
-        }else{
-            $validations['slug'] = ['required','unique:products,slug,'.$id];
-            $validations['sku'] = ['required','string','unique:products,sku,'.$id];
-        }
-
-        $validator = Validator::make($request->all(),$validations);
         if($validator->fails()){
             return response()->json([
+                "status" => "error",
                 "message" => "Validation Failed",
-                "data" => ["validations" => $validator->messages()],
+                "errors" =>  $validator->messages(),
             ],403);
         }
 
-        //Validations
         $module->title = $request->title;
-        $module->slug = $request->slug;
-        $module->sku = $request->sku;
-        $module->price = $request->price;
-        $module->description = $request->description;
-        $module->short_description = $request->short_description;
+        $module->slug = $request->title;
+        $module->title_es = $request->title_es;
+        $module->title_pt = $request->title_pt;
         
+        $module->short_description = $request->short_description;
+        $module->short_description_es = $request->short_description_es;
+        $module->short_description_pt = $request->short_description_et;
 
-        if($request->has('active')){
-            $module->active = $request->active;
-         }
+        $module->long_description = $request->long_description;
+        $module->long_description_es = $request->long_description_es;
+        $module->long_description_pt = $request->long_description_es;
 
-        if($request->has('category_id')){
-           $module->category_id = $request->category_id;
-        }
-
-        if($request->has('unit_id')){
-            $module->unit_id = $request->unit_id;
-         }
+        $module->type = $request->type;
+        $module->sorting = $request->sorting;
+        $module->status = $request->status;
 
         $module->save();
 
-        //Response
-        $message = $id ? 'Record Updated Successfully' : 'Record Created Successfully';
         return response()->json([
-            "message" => $message,
+            "message" => "Record Updated Successfully",
             "data" => ['id' => $module->id]
         ],200);
     }
@@ -198,49 +197,16 @@ class PostController extends Controller
     {
         $module = Post::find($id);
         if($module == null){
-             return response()->json(["message" => 'Record Deleted Successfully'],200);
+             return response()->json(["message" => 'Record Not Found'],403);
         }
         
         $module->delete();
         return response()->json([
-            "message" => 'Product Deleted Successfully',
+            "message" => 'Record Deleted Successfully',
             "data" => ['id' => $id]
         ],200);
     }
 
 
     
-    /*
-     * Remove the specified resource from storage.
-     */
-    public function action(Request $request)
-    {
-        if($request->has('idz') && $request->has('action') && $request->has('value')){
-            
-            $idz = explode(',',$request->idz);   
-            
-            switch ($request->action) {
-            
-                case 'delete':
-                    
-
-                case 'active':
-
-                    $pp = Post::whereIn('id',$idz)->update(['active' => $request->value]);
-                    return response()->json(['message' => "updated"],200);
-                    break;
-                
-                default:
-                break;
-            }
-
-        }
-
-        return response()->json(['message' => __('Error Found')],400);
-    }
-
-
-
-// action
-
 }

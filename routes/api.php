@@ -3,22 +3,23 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+    Route::get('/profile','ProfileController@profile')->name('login');
 
     //Registration
     Route::prefix('admin/auth')->namespace('App\Http\Controllers\V1')->group(function(){
 
         //Registration
-        Route::get('/social-login','LoginController@social_login');  
+        // Route::get('/social-login','LoginController@social_login');  
         Route::post('/register','LoginController@register');
         Route::post('/login','LoginController@login');
 
-        Route::get('/resend/email-verification/{email}','LoginController@resend_email_verification');
-        Route::get('/verify-email/{email}/token/{token}','LoginController@verify_email');
+        // Route::get('/resend/email-verification/{email}','LoginController@resend_email_verification');
+        // Route::get('/verify-email/{email}/token/{token}','LoginController@verify_email');
 
         //Password Reset
-        Route::get('/password-reset-request/{email}','PasswordResetController@password_reset_request');
-        Route::get('/password-reset-verify/{code}','PasswordResetController@password_reset_verify');
-        Route::post('/password-reset/{id}','PasswordResetController@password_reset');
+        // Route::get('/password-reset-request/{email}','PasswordResetController@password_reset_request');
+        // Route::get('/password-reset-verify/{code}','PasswordResetController@password_reset_verify');
+        // Route::post('/password-reset/{id}','PasswordResetController@password_reset');
 
         Route::get('/users','ProfileController@getUsers');
         
@@ -29,14 +30,25 @@ use Illuminate\Support\Facades\Route;
     Route::middleware('auth:sanctum')->prefix('admin')->namespace('App\Http\Controllers\V1')->group(function () {
         
         //Profile
-        Route::get('/profile','ProfileController@profile')->name('profile');
-        
-        Route::get('/logout', 'ProfileController@logout')->name('logout');
+        Route::get('/profile','ProfileController@profile');
+        // Route::post('/profile/update','ProfileController@profile');
+        Route::get('/logout', 'ProfileController@logout');
 
         //Products Management  
         // Route::get('/products/action','ProductController@action');
         // Route::get('/products/search','ProductController@search');
-        // Route::apiResource('products','ProductController');
+        Route::apiResource('sliders','SliderController');
+
+
+        Route::apiResource('posts','PostController');
+
+
+        Route::get('settings/get/{id}','SettingController@get');
+        Route::get('settings/update/{id}','SettingController@update');
+
+        
+
+
       
         //Categories Management  
         // Route::get('/categories/action','CategoryController@action');

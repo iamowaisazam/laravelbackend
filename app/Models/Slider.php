@@ -1,19 +1,20 @@
 <?php
 
 namespace App\Models;
+ 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
  
-class Post extends Model
-{ 
-     use HasFactory;
+class Slider extends Model
+{  use HasFactory;
     
     /*
      * The table associated with the model.
+     * @var string
      */
-    protected $table = 'posts';
-  
-    
+    protected $table = 'sliders';    
+
+
       /**
      * The attributes that are mass assignable.
      *
@@ -21,22 +22,11 @@ class Post extends Model
      */
     protected $fillable = [
         'id',
-        'slug',
-        'category_id',
         'title',
-        'title_es',
-        'title_pt',
+        'link',
         'short_description',
-        'short_description_es',
-        'short_description_pt',
-        'long_description',
-        'long_description_es',
-        'long_description_pt',
         'thumbnail',
-        'thumbnail_es',
-        'thumbnail_pt',
-        'type',
-        'is_featured',
+        'lang',
         'sorting',
         'status',
         'created_by',
@@ -44,12 +34,13 @@ class Post extends Model
         'updated_at',
     ];
 
-    
+
     protected $dates = [
         'created_at',
         'updated_at',
     ];
 
+   
+    
 }
-
 ?>
