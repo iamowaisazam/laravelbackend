@@ -6,8 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\FileManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
-use Storage;
-use Validator;
+use Illuminate\Support\Facades\Validator;
+
 
 class FileManagerController extends Controller
 {
@@ -78,51 +78,55 @@ class FileManagerController extends Controller
     public function store(Request $request){
     
     
-        $validator = Validator::make($request->all(), [
-            'image' => 'required|image:jpeg,png,jpg,gif,svg|max:2048'
-        ]);
+        // $validator = Validator::make($request->all(), [
+        //     'image' => 'required|image:jpeg,png,jpg,gif,svg|max:2048'
+        // ]);
         
-        if ($validator->fails()) {
+        // if ($validator->fails()) {
+            // return response()->json([
+                    //  'message' => 'Validation Failed',
+                    //  'data' => [ 'validations' => $validator->messages()],
+            // ],401);
+        // }
+
+        if(!$request->hasFile('file')){
             return response()->json([
-                     'message' => 'Validation Failed',
-                     'data' => [ 'validations' => $validator->messages()],
+                     'message' => 'File Not Found',
             ],401);
         }
-        
-        
-        try {
 
-                $image = $request->image;
-                $request->filename;
-                $orignalName = $image->getClientOriginalName();
-                $extension = strtolower($request->image->extension());
-                $size = $request->file('image')->getSize();
-                $dir = public_path('uploads/all');
-                $newFileName = rand(10000000000, 9999999999) . date("YmdHis") . "." . $extension;
-                
-                $upload = FileManager::create([
-                    "title" => $orignalName,
-                    "orignal_name" => $orignalName,
-                    "name" => $newFileName,
-                    "extension" => $extension,
-                    "size" => $size,
-                    "path" =>  "uploads/all/".$newFileName,
-                    "link" => env('APP_URL')."/uploads/all/".$newFileName,
-                ]);
-                
-                $image->move($dir,$newFileName);
-                return response()->json([
-                    
-                    'message' => "Uploaded Successfully",
-                    "data" => ['link' => $upload->link]
-                ]);
-            
+        $file =  $request->file;
+        $orignalName = $file->getClientOriginalName();
+        $extension = strtolower($file->extension());
+        $size = $file->getSize();
+        $dir = public_path('uploads');
+        $newFileName = rand(10000000000, 9999999999) . date("YmdHis") . "." . $extension;
+        
+        $upload = FileManager::create([
+            "title" => $orignalName,
+            "orignal_name" => $orignalName,
+            "name" => $newFileName,
+            "extension" => $extension,
+            "access_type" => "global",
+            "size" => $size,
+            "path" =>  "uploads/".$newFileName,
+            "created_by" =>  0,
+            "link" => asset("/uploads/".$newFileName),
+        ]);
+        $file->move($dir,$newFileName);
 
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => $e->getMessage(),
-            ]);
-        }
+        return response()->json([
+            'message' => "Uploaded Successfully",
+            "data" => [
+                'link' => $upload->link
+            ]
+        ]);
+        
+        // } catch (\Exception $e) {
+        //     return response()->json([
+        //         'message' => $e->getMessage(),
+        //     ]);
+        // }
 
     }
 

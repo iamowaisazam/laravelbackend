@@ -18,49 +18,51 @@ class SliderController extends Controller
      */
     public function index(Request $request)
     { 
-        $per_page = 10;
+        
+
+        $limit = 10;
         $sort_by = 'asc';
      
         $data = Slider::query();
 
         if($request->has('search')){
             $search = $request->search;
-            $data->where('title', 'like', '%'.$search.'%')
-            ->orWhere('lang', 'like', '%'.$search.'%');
+            $data->where('title', 'like', '%'.$search.'%');
         }
 
         if($request->has('sort_by') && $request->sort_by != ''){
             $sort_by = $request->sort_by;
         }
 
-        if($request->has('per_page') && is_numeric($request->per_page)){
-            $per_page = $request->per_page;
+        if($request->has('limit') && is_numeric($request->limit)){
+            $limit = $request->limit;
         }
 
         if($request->has('order_by') && $request->order_by != null){
             $data->orderBy($request->order_by,$sort_by);
         }
 
-        $data->select([
-            "id",
-            "title",
-            "link",
-            "short_description",
-            "thumbnail",
-            "lang",
-            "sorting",
-            "status",
-            "created_by",
-            "created_at"
-        ]);
+        // $data->select([
+        //     "id",
+        //     "title",
+        //     "link",
+        //     "short_description",
+        //     "thumbnail",
+        //     "lang",
+        //     "sorting",
+        //     "status",
+        //     "created_by",
+        //     "created_at"
+        // ]);
 
-        $data = $data->paginate($per_page);
+        $data = $data->paginate($limit);
 
         return response()->json([
             'status' => 'success',
             "message" => "Get All Record Successfully",
             "data" =>  $data,
         ],200);
+
     }
 
     /*
@@ -72,9 +74,21 @@ class SliderController extends Controller
         $validator = Validator::make($request->all(),
         [
             'title' => ['required','max:300'],
+            'title_es' => ['nullable','max:300'],
+            'title_pt' => ['nullable','max:300'],
+
             'link' => ['nullable','max:300'],
+            'link_es' => ['nullable','max:300'],
+            'link_pt' => ['nullable','max:300'],
+
             'short_description' => ['nullable','max:300'],
-            'lang' => ['required','in:en,es,pt','max:300'],
+            'short_description_es' => ['nullable','max:300'],
+            'short_description_pt' => ['nullable','max:300'],
+
+            'thumbnail' => ['nullable','max:300'],
+            'thumbnail_es' => ['nullable','max:300'],
+            'thumbnail_pt' => ['nullable','max:300'],
+
             'sorting' => ['nullable','integer','max:300'],
             'status' => ['required','integer','max:300'],
         ]);
@@ -89,9 +103,21 @@ class SliderController extends Controller
 
        $module = Slider::create([
             'title' => $request->title,
+            'title_es' => $request->title_es,
+            'title_pt' => $request->title_pt,
+
             'link' =>  $request->link,
+            'link_es' =>  $request->link_es,
+            'link_pt' =>  $request->link_pt,
+
             'short_description' =>  $request->short_description,
-            'lang' =>  $request->lang,
+            'short_description_es' =>  $request->short_description_es,
+            'short_description_pt' =>  $request->short_description_pt,
+
+            'thumbnail' =>  $request->thumbnail,
+            'thumbnail_es' =>  $request->thumbnail_es,
+            'thumbnail_pt' =>  $request->thumbnail_pt,
+
             'sorting' =>  $request->sorting,
             'status' =>  $request->status,
         ]);
@@ -137,11 +163,23 @@ class SliderController extends Controller
         $validator = Validator::make($request->all(),
         [
             'title' => ['required','max:300'],
+            'title_es' => ['nullable','max:300'],
+            'title_pt' => ['nullable','max:300'],
+
             'link' => ['nullable','max:300'],
+            'link_es' => ['nullable','max:300'],
+            'link_pt' => ['nullable','max:300'],
+
             'short_description' => ['nullable','max:300'],
-            'lang' => ['required','in:en,es,pt','max:300'],
+            'short_description_es' => ['nullable','max:300'],
+            'short_description_pt' => ['nullable','max:300'],
+
+            'thumbnail' => ['nullable','max:300'],
+            'thumbnail_es' => ['nullable','max:300'],
+            'thumbnail_pt' => ['nullable','max:300'],
+
             'sorting' => ['nullable','integer','max:300'],
-            'status' => ['nullable','integer','max:300'],
+            'status' => ['required','integer','max:300'],
         ]);
 
         if($validator->fails()){
@@ -153,9 +191,21 @@ class SliderController extends Controller
         }
 
         $module->title = $request->title;
+        $module->title_es = $request->title;
+        $module->title_pt = $request->title;
+
         $module->link =  $request->link;
+        $module->link_es =  $request->link_es;
+        $module->link_pt =  $request->link_pt;
+
         $module->short_description =  $request->short_description;
-        $module->lang =  $request->lang;
+        $module->short_description_es =  $request->short_description_es;
+        $module->short_description_pt =  $request->short_description_pt;
+
+        $module->thumbnail =  $request->thumbnail;
+        $module->thumbnail_es =  $request->thumbnail_es;
+        $module->thumbnail_pt =  $request->thumbnail_pt;
+
         $module->sorting =  $request->sorting;
         $module->status =  $request->status;
         $module->save();
@@ -192,7 +242,5 @@ class SliderController extends Controller
     }
 
 
-    
-// action
 
 }

@@ -23,10 +23,21 @@ class Slider extends Model
     protected $fillable = [
         'id',
         'title',
+        'title_es',
+        'title_pt',
+
         'link',
+        'link_es',
+        'link_pt',
+
         'short_description',
+        'short_description_es',
+        'short_description_pt',
+
         'thumbnail',
-        'lang',
+        'thumbnail_es',
+        'thumbnail_pt',
+
         'sorting',
         'status',
         'created_by',

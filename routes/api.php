@@ -3,7 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-    Route::get('/profile','ProfileController@profile')->name('login');
+    // Route::get('/profile','ProfileController@profile')->name('login');
 
     //Registration
     Route::prefix('admin/auth')->namespace('App\Http\Controllers\V1')->group(function(){
@@ -41,6 +41,16 @@ use Illuminate\Support\Facades\Route;
 
 
         Route::apiResource('posts','PostController');
+
+          //Files Upload
+          Route::apiResource('filemanagers','FileManagerController');
+
+          
+        // Route::post('filemanagers/update/{id}', 'FileManagerController@update');
+        // Route::get('filemanagers/file/{id}', 'FileManagerController@get');
+        // Route::post('filemanagers/store', 'FileManagerController@store');
+        // Route::get('filemanagers/delete/{id}', 'FileManagerController@delete');
+        // Route::get('filemanagera/index', 'FileManagerController@index');
 
 
         Route::get('settings/get/{id}','SettingController@get');

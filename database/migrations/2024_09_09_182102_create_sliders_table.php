@@ -15,10 +15,21 @@ return new class extends Migration
             $table->id();
 
             $table->string('title');
+            $table->string('title_es')->nullable();
+            $table->string('title_pt')->nullable();
+
             $table->string('link')->nullable();
+            $table->string('link_es')->nullable();
+            $table->string('link_pt')->nullable();
+
             $table->string('short_description')->nullable();
+            $table->string('short_description_es')->nullable();
+            $table->string('short_description_pt')->nullable();
+
             $table->string('thumbnail')->nullable();
-            $table->string('lang');
+            $table->string('thumbnail_es')->nullable();
+            $table->string('thumbnail_pt')->nullable();
+
             $table->integer('sorting')->nullable()->default(0);
             $table->integer('status')->nullable()->default(1);
             $table->integer('created_by')->nullable()->default(null);
