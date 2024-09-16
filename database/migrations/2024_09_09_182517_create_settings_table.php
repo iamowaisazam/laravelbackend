@@ -12,6 +12,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+
+        $description = "<p>El Centro Latinoamericano de Administración para el Desarrollo (CLAD) es un organismo público internacional de carácter intergubernamental, fundado en 1972 por los gobiernos de México, Perú y Venezuela.</p>
+        <p>El Centro Latinoamericano de Administración para el Desarrollo (CLAD) es un organismo público internacional de carácter intergubernamental, fundado en 1972 por los gobiernos de México, Perú y Venezuela.</p>
+        <p>Nuestra misión es conectar países, instituciones y profesionales de la administración pública, facilitando el intercambio de conocimientos, la creación de redes y la implementación de mejores prácticas en áreas clave como el cambio climático, la gobernanza y la inclusión</p>";
         Schema::create('settings', function (Blueprint $table) {
             $table->id();
             $table->string('name')->nullable();
@@ -33,17 +37,17 @@ return new class extends Migration
 
         DB::table('settings')->insert([
             'name' => 'home_about_image',
-            'value_en' => 'image',
-            'value_es' => 'image',
-            'value_pt' => 'image',
+            'value_en' => 'uploads/about.png',
+            'value_es' => 'uploads/about.png',
+            'value_pt' => 'uploads/about.png',
             'type' => 'text',
         ]);
 
         DB::table('settings')->insert([
             'name' => 'home_about_description',
-            'value_en' => '<p>El Centro Latinoamericano de Administración para el Desarrollo (CLAD) es un organismo público internacional de carácter intergubernamental, fundado en 1972 por los gobiernos de México, Perú y Venezuela.</p>',
-            'value_es' => '<p>El Centro Latinoamericano de Administración para el Desarrollo (CLAD) es un organismo público internacional de carácter intergubernamental, fundado en 1972 por los gobiernos de México, Perú y Venezuela.</p>',
-            'value_pt' => '<p>El Centro Latinoamericano de Administración para el Desarrollo (CLAD) es un organismo público internacional de carácter intergubernamental, fundado en 1972 por los gobiernos de México, Perú y Venezuela.</p>',
+            'value_en' => $description,
+            'value_es' => $description,
+            'value_pt' => $description,
             'type' => 'text',
         ]);
 
