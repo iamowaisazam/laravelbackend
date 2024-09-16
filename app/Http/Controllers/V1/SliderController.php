@@ -19,9 +19,10 @@ class SliderController extends Controller
     public function index(Request $request)
     { 
         
-
-        $limit = 10;
+        $lang = $request->lang ?? 'en';
         $sort_by = 'asc';
+        $limit = 10;
+
      
         $data = Slider::query();
 
@@ -34,33 +35,36 @@ class SliderController extends Controller
             $sort_by = $request->sort_by;
         }
 
-        if($request->has('limit') && is_numeric($request->limit)){
-            $limit = $request->limit;
-        }
-
         if($request->has('order_by') && $request->order_by != null){
             $data->orderBy($request->order_by,$sort_by);
         }
 
-        // $data->select([
-        //     "id",
-        //     "title",
-        //     "link",
-        //     "short_description",
-        //     "thumbnail",
-        //     "lang",
-        //     "sorting",
-        //     "status",
-        //     "created_by",
-        //     "created_at"
-        // ]);
+        $total = $data->count();
+       
+        $currentPage = $request->input('page', 1);
+        $offset = ($currentPage - 1) * $limit;
+        $data = $data->limit($limit)->offset($offset)
+        ->select([
+            'id',
+            'title_'.$lang.' as title',
+            'link_'.$lang.' as link',
+            'short_description_'.$lang.' as short_description',
+            'thumbnail_'.$lang.' as thumbnail',
+        ])->get();
 
-        $data = $data->paginate($limit);
+        $data = $data->map(function ($item){
+            $item['thumbnail_prev'] = asset($item['thumbnail']);
+            return $item;
+        });
 
         return response()->json([
             'status' => 'success',
             "message" => "Get All Record Successfully",
-            "data" =>  $data,
+            "data" =>  [
+                'page' => $currentPage,
+                'total' => $total,
+                'data' => $data, 
+            ],
         ],200);
 
     }
@@ -70,25 +74,14 @@ class SliderController extends Controller
      */
     public function store(Request $request)
     {
+        $lang = $request->lang ?? 'en';
 
         $validator = Validator::make($request->all(),
         [
-            'title' => ['required','max:300'],
-            'title_es' => ['nullable','max:300'],
-            'title_pt' => ['nullable','max:300'],
-
+            'title' => ['nullable','max:300'],
             'link' => ['nullable','max:300'],
-            'link_es' => ['nullable','max:300'],
-            'link_pt' => ['nullable','max:300'],
-
             'short_description' => ['nullable','max:300'],
-            'short_description_es' => ['nullable','max:300'],
-            'short_description_pt' => ['nullable','max:300'],
-
             'thumbnail' => ['nullable','max:300'],
-            'thumbnail_es' => ['nullable','max:300'],
-            'thumbnail_pt' => ['nullable','max:300'],
-
             'sorting' => ['nullable','integer','max:300'],
             'status' => ['required','integer','max:300'],
         ]);
@@ -102,22 +95,10 @@ class SliderController extends Controller
         }
 
        $module = Slider::create([
-            'title' => $request->title,
-            'title_es' => $request->title_es,
-            'title_pt' => $request->title_pt,
-
-            'link' =>  $request->link,
-            'link_es' =>  $request->link_es,
-            'link_pt' =>  $request->link_pt,
-
-            'short_description' =>  $request->short_description,
-            'short_description_es' =>  $request->short_description_es,
-            'short_description_pt' =>  $request->short_description_pt,
-
-            'thumbnail' =>  $request->thumbnail,
-            'thumbnail_es' =>  $request->thumbnail_es,
-            'thumbnail_pt' =>  $request->thumbnail_pt,
-
+            'title_'.$lang => $request->title,
+            'link_'.$lang =>  $request->link,
+            'short_description_'.$lang =>  $request->short_description,
+            'thumbnail_'.$lang =>  $request->thumbnail,
             'sorting' =>  $request->sorting,
             'status' =>  $request->status,
         ]);
@@ -137,7 +118,15 @@ class SliderController extends Controller
      */
     public function show($id,Request $request )
     {
-        $slider = Slider::where('id',$id)->get();       
+        $lang = $request->lang ?? 'en';
+
+        $slider = Slider::select([
+            'id',
+            'title_'.$lang.' as title',
+            'link_'.$lang.' as link',
+            'short_description_'.$lang.' as short_description',
+            'thumbnail_'.$lang.' as thumbnail',
+        ])->where('id',$id)->first();       
         return response()->json([
             "message" => 'Get Record Successfully',
             "data" => $slider,
@@ -151,8 +140,9 @@ class SliderController extends Controller
      */
     public function update(Request $request,$id)
     {
-
+        $lang = $request->lang ?? 'en';
         $module = Slider::where('id',$id)->first();
+
         if(!$module){
             return response()->json([
                 "status" => "error",
@@ -162,22 +152,10 @@ class SliderController extends Controller
 
         $validator = Validator::make($request->all(),
         [
-            'title' => ['required','max:300'],
-            'title_es' => ['nullable','max:300'],
-            'title_pt' => ['nullable','max:300'],
-
+            'title' => ['nullable','max:300'],
             'link' => ['nullable','max:300'],
-            'link_es' => ['nullable','max:300'],
-            'link_pt' => ['nullable','max:300'],
-
             'short_description' => ['nullable','max:300'],
-            'short_description_es' => ['nullable','max:300'],
-            'short_description_pt' => ['nullable','max:300'],
-
             'thumbnail' => ['nullable','max:300'],
-            'thumbnail_es' => ['nullable','max:300'],
-            'thumbnail_pt' => ['nullable','max:300'],
-
             'sorting' => ['nullable','integer','max:300'],
             'status' => ['required','integer','max:300'],
         ]);
@@ -190,27 +168,15 @@ class SliderController extends Controller
             ],403);
         }
 
-        $module->title = $request->title;
-        $module->title_es = $request->title;
-        $module->title_pt = $request->title;
-
-        $module->link =  $request->link;
-        $module->link_es =  $request->link_es;
-        $module->link_pt =  $request->link_pt;
-
-        $module->short_description =  $request->short_description;
-        $module->short_description_es =  $request->short_description_es;
-        $module->short_description_pt =  $request->short_description_pt;
-
-        $module->thumbnail =  $request->thumbnail;
-        $module->thumbnail_es =  $request->thumbnail_es;
-        $module->thumbnail_pt =  $request->thumbnail_pt;
-
-        $module->sorting =  $request->sorting;
-        $module->status =  $request->status;
+        $module->{"title_" . $lang} = $request->title;
+        $module->{"link_" . $lang} = $request->link;
+        $module->{"short_description_" . $lang} = $request->short_description;
+        $module->{"thumbnail_" . $lang} = $request->thumbnail;
+        $module->sorting = $request->sorting;
+        $module->status = $request->status;
         $module->save();
-        
 
+        
         return response()->json([
             "message" => "Record Updated Successfully",
             "data" => ['id' => $module->id]

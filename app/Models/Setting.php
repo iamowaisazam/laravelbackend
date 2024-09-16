@@ -5,14 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
  
-class Slider extends Model
+class Setting extends Model
 {  use HasFactory;
     
     /*
      * The table associated with the model.
      * @var string
      */
-    protected $table = 'sliders';    
+    protected $table = 'settings';    
 
 
       /**
@@ -22,25 +22,11 @@ class Slider extends Model
      */
     protected $fillable = [
         'id',
-        'title_en',
-        'title_es',
-        'title_pt',
-
-        'link_en',
-        'link_es',
-        'link_pt',
-
-        'short_description_en',
-        'short_description_es',
-        'short_description_pt',
-
-        'thumbnail_en',
-        'thumbnail_es',
-        'thumbnail_pt',
-
-        'sorting',
-        'status',
-        'created_by',
+        'name',
+        'value_en',
+        'value_es',
+        'value_pt',
+        'type',
         'created_at',
         'updated_at',
     ];
@@ -51,7 +37,5 @@ class Slider extends Model
         'updated_at',
     ];
 
-   
-    
 }
 ?>

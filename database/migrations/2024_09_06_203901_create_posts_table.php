@@ -17,19 +17,19 @@ return new class extends Migration
             $table->string('slug')->nullable();
             $table->integer('category_id')->nullable();
 
-            $table->string('title');
+            $table->string('title_en')->nullable();
             $table->string('title_es')->nullable();
             $table->string('title_pt')->nullable();
             
-            $table->string('short_description')->nullable();
+            $table->string('short_description_en')->nullable();
             $table->string('short_description_es')->nullable();
             $table->string('short_description_pt')->nullable();
 
-            $table->text('long_description')->nullable();
+            $table->text('long_description_en')->nullable();
             $table->text('long_description_es')->nullable();
             $table->text('long_description_pt')->nullable();
 
-            $table->string('thumbnail')->nullable();
+            $table->string('thumbnail_en')->nullable();
             $table->string('thumbnail_es')->nullable();
             $table->string('thumbnail_pt')->nullable();
 

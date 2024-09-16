@@ -38,12 +38,9 @@ use Illuminate\Support\Facades\Route;
         // Route::get('/products/action','ProductController@action');
         // Route::get('/products/search','ProductController@search');
         Route::apiResource('sliders','SliderController');
-
-
         Route::apiResource('posts','PostController');
-
-          //Files Upload
-          Route::apiResource('filemanagers','FileManagerController');
+        Route::apiResource('filemanagers','FileManagerController');
+        Route::apiResource('settings','SettingController');
 
           
         // Route::post('filemanagers/update/{id}', 'FileManagerController@update');
@@ -53,8 +50,8 @@ use Illuminate\Support\Facades\Route;
         // Route::get('filemanagera/index', 'FileManagerController@index');
 
 
-        Route::get('settings/get/{id}','SettingController@get');
-        Route::get('settings/update/{id}','SettingController@update');
+        // Route::get('settings/get/{id}','SettingController@get');
+        // Route::get('settings/update/{id}','SettingController@update');
 
         
 

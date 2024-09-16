@@ -14,19 +14,19 @@ return new class extends Migration
         Schema::create('sliders', function (Blueprint $table) {
             $table->id();
 
-            $table->string('title');
+            $table->string('title_en')->nullable();
             $table->string('title_es')->nullable();
             $table->string('title_pt')->nullable();
 
-            $table->string('link')->nullable();
+            $table->string('link_en')->nullable();
             $table->string('link_es')->nullable();
             $table->string('link_pt')->nullable();
 
-            $table->string('short_description')->nullable();
+            $table->string('short_description_en')->nullable();
             $table->string('short_description_es')->nullable();
             $table->string('short_description_pt')->nullable();
 
-            $table->string('thumbnail')->nullable();
+            $table->string('thumbnail_en')->nullable();
             $table->string('thumbnail_es')->nullable();
             $table->string('thumbnail_pt')->nullable();
 

@@ -19,49 +19,60 @@ class PostController extends Controller
      */
     public function index(Request $request)
     { 
-        $per_page = 10;
+        
+        $lang = $request->lang ?? 'en';
         $sort_by = 'asc';
+        $limit = 10;
+
      
         $data = Post::query();
 
         if($request->has('search')){
             $search = $request->search;
             $data->where('title', 'like', '%'.$search.'%');
-            // ->orWhere('lang', 'like', '%'.$search.'%');
         }
 
         if($request->has('sort_by') && $request->sort_by != ''){
             $sort_by = $request->sort_by;
         }
 
-        if($request->has('per_page') && is_numeric($request->per_page)){
-            $per_page = $request->per_page;
-        }
-
         if($request->has('order_by') && $request->order_by != null){
             $data->orderBy($request->order_by,$sort_by);
         }
 
-        // $data->select([
-        //     "id",
-        //     "title",
-        //     "link",
-        //     "short_description",
-        //     "thumbnail",
-        //     "lang",
-        //     "sorting",
-        //     "status",
-        //     "created_by",
-        //     "created_at"
-        // ]);
 
-        $data = $data->paginate($per_page);
+        $total = $data->count();
+       
+        $currentPage = $request->input('page', 1);
+        $offset = ($currentPage - 1) * $limit;
+        $data = $data->limit($limit)->offset($offset)
+        ->select([
+            'id',
+            'title_'.$lang.' as title',
+            'short_description_'.$lang.' as short_description',
+            'long_description_'.$lang.' as long_description',
+            'thumbnail_'.$lang.' as thumbnail',
+            'is_featured',
+            'status',
+            'created_at',
+            'updated_at'
+        ])->get();
+
+        $data = $data->map(function ($item){
+            $item['thumbnail_prev'] = asset($item['thumbnail']);
+            return $item;
+        });
 
         return response()->json([
-            "status" => "success",
-            "message" => "Get All Records Successfully",
-            "data" =>  $data,
+            'status' => 'success',
+            "message" => "Get All Record Successfully",
+            "data" =>  [
+                'page' => $currentPage,
+                'total' => $total,
+                'data' => $data,
+            ],
         ],200);
+
     }
 
      /*
@@ -69,24 +80,17 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
-
         $validator = Validator::make($request->all(),
         [
-            'title' => ['required','max:300'],
-            'title_es' => ['nullable','max:300'],
-            'title_pt' => ['nullable','max:300'],
-            
-            'short_description' => ['nullable','max:300'],
-            'short_description_es' => ['nullable','max:300'],
-            'short_description_pt' => ['nullable','max:300'],
-
+            'title' => ['required','max:100'],
+            'thumbnail' => ['nullable','max:100'],
+            'short_description' => ['required','max:300'],
             'long_description' => ['nullable','max:1000'],
-            'long_description_es' => ['nullable','max:1000'],
-            'long_description_pt' => ['nullable','max:1000'],
-
-            'type' => ['required','in:post','max:300'],
+            'type' => ['required','max:300'],
+            'featured' => ['required','integer','max:300'],
             'sorting' => ['nullable','integer','max:300'],
             'status' => ['required','integer','max:300'],
+            'lang' => ['required','in:en,es,pt','max:300'],
         ]);
 
         if($validator->fails()){
@@ -97,24 +101,26 @@ class PostController extends Controller
             ],403);
         }
 
-       $module = Post::create([
-            'title' => $request->title,
-            'slug' => $request->title,
-            'title_es' => $request->title_es,
-            'title_pt' => $request->title_pt,
-            
-            'short_description' => $request->short_description,
-            'short_description_es' => $request->short_description_es,
-            'short_description_pt' => $request->short_description_et,
+        $lang = $request->lang;
 
-            'long_description' => $request->long_description,
-            'long_description_es' => $request->long_description_es,
-            'long_description_pt' => $request->long_description_es,
 
-            'type' => $request->type,
-            'sorting' => $request->sorting,
-            'status' => $request->status,
-        ]);
+        $slug = strtolower($request->title);
+        $slug = preg_replace('/[^a-z0-9-]/', ' ', $slug);
+        $slug = preg_replace('/\s+/', '-', $slug);
+        $slug = trim($slug, '-');
+
+        $module = new Post();
+        $module->slug = $slug;
+
+        $module->{"title_" . $lang} = $request->title;
+        $module->{"short_description_" . $lang} = $request->short_description;
+        $module->{"long_description_" . $lang} = $request->long_description;
+        $module->{"thumbnail_" . $lang} = $request->thumbnail;
+        $module->sorting = $request->sorting;
+        $module->type = 'post';
+        $module->is_featured = $request->featured;
+        $module->status = $request->status;
+        $module->save();
 
         return response()->json([
             "message" => "Record Created Successfully",
@@ -138,21 +144,15 @@ class PostController extends Controller
 
         $validator = Validator::make($request->all(),
         [
-            'title' => ['required','max:300'],
-            'title_es' => ['nullable','max:300'],
-            'title_pt' => ['nullable','max:300'],
-            
-            'short_description' => ['nullable','max:300'],
-            'short_description_es' => ['nullable','max:300'],
-            'short_description_pt' => ['nullable','max:300'],
-
+            'title' => ['required','max:100'],
+            'thumbnail' => ['nullable','max:100'],
+            'short_description' => ['required','max:300'],
             'long_description' => ['nullable','max:1000'],
-            'long_description_es' => ['nullable','max:1000'],
-            'long_description_pt' => ['nullable','max:1000'],
-
-            'type' => ['required','in:post','max:300'],
+            'type' => ['required','max:300'],
             'sorting' => ['nullable','integer','max:300'],
+            'featured' => ['required','integer','max:300'],
             'status' => ['required','integer','max:300'],
+            'lang' => ['required','in:en,es,pt','max:300'],
         ]);
 
         if($validator->fails()){
@@ -163,28 +163,46 @@ class PostController extends Controller
             ],403);
         }
 
-        $module->title = $request->title;
-        $module->slug = $request->title;
-        $module->title_es = $request->title_es;
-        $module->title_pt = $request->title_pt;
+        $lang = $request->lang ?? 'en';
+
+        $module->{"title_" . $lang} = $request->title;
+        $module->{"short_description_" . $lang} = $request->short_description;
+        $module->{"long_description_" . $lang} = $request->long_description;
+        $module->{"thumbnail_" . $lang} = $request->thumbnail;
         
-        $module->short_description = $request->short_description;
-        $module->short_description_es = $request->short_description_es;
-        $module->short_description_pt = $request->short_description_et;
+        // $module->sorting = $request->sorting;
+        // $module->type = 'post';
 
-        $module->long_description = $request->long_description;
-        $module->long_description_es = $request->long_description_es;
-        $module->long_description_pt = $request->long_description_es;
-
-        $module->type = $request->type;
-        $module->sorting = $request->sorting;
+        $module->is_featured = $request->featured;
         $module->status = $request->status;
-
+        
         $module->save();
 
         return response()->json([
             "message" => "Record Updated Successfully",
             "data" => ['id' => $module->id]
+        ],200);
+
+    }
+
+    public function show($id,Request $request )
+    {
+        $lang = $request->lang ?? 'en';
+
+        $slider = Post::select([
+            'id',
+            'title_'.$lang.' as title',
+            'short_description_'.$lang.' as short_description',
+            'long_description_'.$lang.' as long_description',
+            'thumbnail_'.$lang.' as thumbnail',
+            'is_featured',
+            'status',
+            'created_at',
+            'updated_at'
+        ])->where('id',$id)->first();       
+        return response()->json([
+            "message" => 'Get Record Successfully',
+            "data" => $slider,
         ],200);
     }
 
