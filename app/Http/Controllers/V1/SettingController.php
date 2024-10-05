@@ -18,12 +18,13 @@ class SettingController extends Controller
     {
         
        $lang = $request->lang ?? 'en';
+       $value = 'value_'.$lang;
+
        $module = Setting::select([
         'id',
         'name',
         'value_'.$lang.' as value',
-       ])->get();
-
+       ])->pluck('value','name')->toArray();
 
         return response()->json([
             "message" => "Record Created Successfully",
@@ -38,12 +39,20 @@ class SettingController extends Controller
      */
     public function store(Request $request)
     {
+
+        $data = $request->data;
+        $name = $request->name;
         $lang = $request->lang;
 
-        foreach ($request->data as $key => $value) {
-            // dd($value);
-            Setting::where('name',$key)->update([
-                'value_'.$lang => $value,
+        $setting = Setting::where('name',$name)->first();
+        if($setting){
+            Setting::where('name',$name)->update([
+                'value_'.$lang => $data,
+            ]);
+        }else{
+            Setting::create([
+                'name' => $name,
+                'value_'.$lang => $data,
             ]);
         }
 
@@ -61,8 +70,11 @@ class SettingController extends Controller
     public function show($id,Request $request )
     {
 
-        $module = Setting::where('name',$id)->first();
-        if(count($module) > 0){
+        $lang = $request->lang ?? 'en';
+        $value = 'value_'.$lang;
+        $module = Setting::where('name',$id)->pluck($value,'name')->toArray();
+
+        if($module){
             return response()->json([
                 "message" => "Record Created Successfully",
                 "data" => $module,

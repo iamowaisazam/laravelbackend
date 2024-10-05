@@ -26,8 +26,18 @@ use Illuminate\Support\Facades\Route;
     });
 
 
+
+    Route::prefix('web')->namespace('App\Http\Controllers\V1')->group(function () {
+
+        Route::get('/settings/{id}','SettingController@show');
+
+    });
+
+
     // Admin Panel
-    Route::middleware('auth:sanctum')->prefix('admin')->namespace('App\Http\Controllers\V1')->group(function () {
+    Route::prefix('admin')->namespace('App\Http\Controllers\V1')->group(function () {
+
+        Route::apiResource('settings','SettingController');
         
         //Profile
         Route::get('/profile','ProfileController@profile');

@@ -23,67 +23,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // Slider ________________________________________________________
-
-        $data  = [
-            [
-                'title' => 'Impulsando una transformación gubernamental colaborativa e inclusiva',
-            ],
-            [
-                'title' => 'Impulsando una transformación gubernamental colaborativa e inclusiva',
-            ],
-            [
-                'title' => 'Impulsando una transformación gubernamental colaborativa e inclusiva',
-            ],
-            [
-                'title' => 'Impulsando una transformación gubernamental colaborativa e inclusiva'
-            ]
-        ];
-
-        $data = collect($data)->map(function ($item) {
-            $item['image'] = 'uploads/slide.png';
-            $item['link'] = 'link';
-            $item['button'] = 'view';
-            return $item;
-        })->toArray();
-
-        
-        DB::table('settings')->insert([
-            'name' => 'home_slider',
-            'value_en' => json_encode($data),
-            'value_es' => json_encode($data),
-            'value_pt' => json_encode($data),
-            'type' => 'text',
-        ]);
-
-
-
-
-
-
-        // Home About ________________________________________________________
-
-        $description = "<p>El Centro Latinoamericano de Administración para el Desarrollo (CLAD) es un organismo público internacional de carácter intergubernamental, fundado en 1972 por los gobiernos de México, Perú y Venezuela.</p>
-        <p>El Centro Latinoamericano de Administración para el Desarrollo (CLAD) es un organismo público internacional de carácter intergubernamental, fundado en 1972 por los gobiernos de México, Perú y Venezuela.</p>
-        <p>Nuestra misión es conectar países, instituciones y profesionales de la administración pública, facilitando el intercambio de conocimientos, la creación de redes y la implementación de mejores prácticas en áreas clave como el cambio climático, la gobernanza y la inclusión</p>";
-
-        $data = [
-            'title' => 'Sobre el CLAD',
-            'image' => 'uploads/about.png',
-            'description' => $description,
-        ];
-
-
-        DB::table('settings')->insert([
-            'name' => 'home_about',
-            'value_en' => json_encode($data),
-            'value_es' => json_encode($data),
-            'value_pt' => json_encode($data),
-            'type' => 'text',
-        ]);
-
-
-
+       
 
 
 
