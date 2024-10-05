@@ -49,6 +49,8 @@ use Illuminate\Support\Facades\Route;
         // Route::get('/products/search','ProductController@search');
         Route::apiResource('sliders','SliderController');
         Route::apiResource('posts','PostController');
+
+        Route::get('filemanagers/search','FileManagerController@search');
         Route::apiResource('filemanagers','FileManagerController');
         Route::apiResource('settings','SettingController');
 

@@ -12,67 +12,91 @@ use Illuminate\Support\Facades\Validator;
 class FileManagerController extends Controller
 {
     
-     public function index(Request $request)
-    {
-        
-        $per_page = 10;
-        $sort = 'date-asc';
-        $assending = 'asc';
-   
+     /**
+     * Show the profile for a given user.
+     */
+    public function search(Request $request)
+    { 
+
         $data = FileManager::query();
 
         if($request->has('search')){
             $search = $request->search;
-            $data->where('title', 'like', '%'.$search.'%')->orWhere('extension', 'like', '%'.$search.'%');
+            $data->where('title', 'like', '%'.$search.'%');
         }
 
-        if($request->has('ascending') && $request->ascending != ''){
-            $assending = $request->ascending;
-        }
+        $data = $data->select([
+            'id',
+            'title',
+            'link'
+        ])
+        ->limit(10)
+        ->get();
 
-        if($request->has('sort') && $request->sort != null){
-            $sort = $request->sort;
-        }
-
-        if($request->has('per_page') && is_numeric($request->per_page)){
-            $per_page = $request->per_page;
-        }
-
-        switch ($sort) {
-
-            case 'size-desc':
-                $data->orderBy('size','desc');
-                break;
-                
-            case 'size-asc':
-                $data->orderBy('size','asc');
-                break;    
-
-            case 'date-asc':
-                $data->orderBy('created_at','asc');
-                break;
-                
-            case 'date-desc':
-                $data->orderBy('created_at','desc');
-                break;    
-
-
-            default:
-
-               $data->orderBy('created_at',$assending);
-            break;
-        }
-
+        //  $data = $data->map(function ($item){
+            // $item['thumbnail_prev'] = asset($item['thumbnail']);
+            // return $item;
+        // });
 
         return response()->json([
-            'query' => '',
-            "message" => "Records Get  Successfully",
-            "data" =>  $data->paginate($per_page),
+            'status' => 'success',
+            "message" => "Get All Record Successfully",
+            "data" =>  $data
         ],200);
-        
-        
-       
+    
     }
+
+      /**
+     * Show the profile for a given user.
+     */
+    public function index(Request $request)
+    { 
+        
+        $lang = $request->lang ?? 'en';
+        $sort_by = 'asc';
+        $limit = 10;
+
+     
+        $data = FileManager::query();
+
+        if($request->has('search')){
+            $search = $request->search;
+            $data->where('title', 'like', '%'.$search.'%');
+        }
+
+        if($request->has('sort_by') && $request->sort_by != ''){
+            $sort_by = $request->sort_by;
+        }
+
+        if($request->has('order_by') && $request->order_by != null){
+            $data->orderBy($request->order_by,$sort_by);
+        }
+
+        $total = $data->count();
+       
+        $currentPage = $request->input('page', 1);
+        $offset = ($currentPage - 1) * $limit;
+        $data = $data->limit($limit)->offset($offset)
+        ->select('*')
+        ->get();
+
+        // $data = $data->map(function ($item){
+        //     $item['thumbnail_prev'] = asset($item['thumbnail']);
+        //     return $item;
+        // });
+
+        return response()->json([
+            'status' => 'success',
+            "message" => "Get All Record Successfully",
+            "data" =>  [
+                'page' => $currentPage,
+                'total' => $total,
+                'data' => $data,
+            ],
+        ],200);
+
+    }
+
 
 
     public function store(Request $request){
@@ -191,7 +215,7 @@ class FileManagerController extends Controller
 
     }
 
-    public function delete(Request $request,$id)
+    public function destroy(Request $request,$id)
     {
         // $user = $request->user();
         $upload = FileManager::find($id);
@@ -202,19 +226,13 @@ class FileManagerController extends Controller
             ],400);
         }
 
-        // if($user->id != $upload->user_id){
-        //     return response()->json([
-        //         "message" => "Unauthorized" ,
-        //     ],400);
-        // }
-
-        if(! File::exists(public_path('uploads/all/'.$upload->name))){
+        if(! File::exists(public_path('uploads/'.$upload->name))){
             return response()->json([
                 "message" => "File Exist In Directory" ,
             ],400);
         }
 
-        if(! File::delete(public_path("uploads/all/".$upload->name))){
+        if(! File::delete(public_path("uploads/".$upload->name))){
             return response()->json([
                 "message" => "File Not Deleted" ,
             ],400); 
