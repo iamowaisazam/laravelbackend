@@ -30,6 +30,7 @@ use Illuminate\Support\Facades\Route;
     Route::prefix('web')->namespace('App\Http\Controllers\V1')->group(function () {
 
         Route::get('/settings/{id}','SettingController@show');
+		Route::get('/settings','SettingController@index');
 
     });
 
