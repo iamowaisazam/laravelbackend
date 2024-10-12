@@ -54,14 +54,14 @@ class FileManagerController extends Controller
         
         $lang = $request->lang ?? 'en';
         $sort_by = 'asc';
-        $limit = 10;
+        $limit = 100;
 
      
         $data = FileManager::query();
 
         if($request->has('search')){
             $search = $request->search;
-            $data->where('title', 'like', '%'.$search.'%');
+            $data->where('name', 'like', '%'.$search.'%');
         }
 
         if($request->has('sort_by') && $request->sort_by != ''){
@@ -100,8 +100,7 @@ class FileManagerController extends Controller
 
 
     public function store(Request $request){
-    
-    
+
         // $validator = Validator::make($request->all(), [
         //     'image' => 'required|image:jpeg,png,jpg,gif,svg|max:2048'
         // ]);
@@ -120,24 +119,25 @@ class FileManagerController extends Controller
         }
 
         $file =  $request->file;
-        $orignalName = $file->getClientOriginalName();
+        $filename = $request->filename;
         $extension = strtolower($file->extension());
         $size = $file->getSize();
         $dir = public_path('uploads');
-        $newFileName = rand(10000000000, 9999999999) . date("YmdHis") . "." . $extension;
+
+        $newPath = rand(10000000000, 9999999999) . date("YmdHis") . "." . $extension;
+        $newFileName = $filename;
         
         $upload = FileManager::create([
-            "title" => $orignalName,
-            "orignal_name" => $orignalName,
             "name" => $newFileName,
             "extension" => $extension,
             "access_type" => "global",
             "size" => $size,
-            "path" =>  "uploads/".$newFileName,
+            "path" =>  "uploads/".$newPath,
             "created_by" =>  0,
-            "link" => asset("/uploads/".$newFileName),
+            "link" => asset("/uploads/".$newPath),
         ]);
-        $file->move($dir,$newFileName);
+
+        $file->move($dir,$newPath);
 
         return response()->json([
             'message' => "Uploaded Successfully",
@@ -197,15 +197,15 @@ class FileManagerController extends Controller
             ],400);
         }
         
-        $upload->title = $request->title;
-        $upload->description = $request->description;
+        $upload->name = $request->name;
+        // $upload->description = $request->description;
         $upload->save();
         
-        if(! File::exists(public_path($upload->file_name))){
-            return response()->json([
-                "message" => "File Not Found" ,
-            ],400);
-        }
+        // if(! File::exists(public_path($upload->file_name))){
+        //     return response()->json([
+        //         "message" => "File Not Found" ,
+        //     ],400);
+        // }
 
 
         return response()->json([
@@ -226,16 +226,16 @@ class FileManagerController extends Controller
             ],400);
         }
 
-        if(! File::exists(public_path('uploads/'.$upload->name))){
-            return response()->json([
-                "message" => "File Exist In Directory" ,
-            ],400);
+        if(! File::exists(public_path($upload->path))){
+            // return response()->json([
+                // "message" => "File Exist In Directory" ,
+            // ],400);
         }
 
-        if(! File::delete(public_path("uploads/".$upload->name))){
-            return response()->json([
-                "message" => "File Not Deleted" ,
-            ],400); 
+        if(! File::delete(public_path($upload->name))){
+            // return response()->json([
+                // "message" => "File Not Deleted" ,
+            // ],400); 
         }
         
         $upload->delete();
