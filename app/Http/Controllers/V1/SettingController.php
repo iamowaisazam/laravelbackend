@@ -40,19 +40,25 @@ class SettingController extends Controller
     public function store(Request $request)
     {
 
-        $data = $request->data;
+        // dd($request->all());
+
+        // return response()->json([
+        //     "data" => $request->all(),
+        //     "message" => "Record Updated Successfully",
+        // ],200);
+
         $name = $request->name;
         $lang = $request->lang;
 
         $setting = Setting::where('name',$name)->first();
         if($setting){
             Setting::where('name',$name)->update([
-                'value_'.$lang => $data,
+                'value_'.$lang => json_encode($request->all()),
             ]);
         }else{
             Setting::create([
                 'name' => $name,
-                'value_'.$lang => $data,
+                'value_'.$lang => json_encode($request->all()),
             ]);
         }
 
