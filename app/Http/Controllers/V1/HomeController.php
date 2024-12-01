@@ -181,6 +181,9 @@ class HomeController extends Controller
         $lang = $request->lang ?? 'es';
         $sort_by = 'asc';
 
+        DB::statement("SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode, 'ONLY_FULL_GROUP_BY', ''));");
+
+
         $data = Post::Leftjoin('categories','categories.id','=','posts.category_id');
 
         if($request->has('id') && $request->id){
