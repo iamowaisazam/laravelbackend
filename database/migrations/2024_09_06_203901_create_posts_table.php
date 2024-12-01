@@ -21,9 +21,9 @@ return new class extends Migration
             $table->string('title_es')->nullable();
             $table->string('title_pt')->nullable();
             
-            $table->string('short_description_en')->nullable();
-            $table->string('short_description_es')->nullable();
-            $table->string('short_description_pt')->nullable();
+            $table->text('short_description_en')->nullable();
+            $table->text('short_description_es')->nullable();
+            $table->text('short_description_pt')->nullable();
 
             $table->text('long_description_en')->nullable();
             $table->text('long_description_es')->nullable();
@@ -33,8 +33,27 @@ return new class extends Migration
             $table->string('thumbnail_es')->nullable();
             $table->string('thumbnail_pt')->nullable();
 
-            $table->string('type')->nullable();
+            $table->string('banner_en')->nullable();
+            $table->string('banner_es')->nullable();
+            $table->string('banner_pt')->nullable();
 
+            $table->string('pdf_en')->nullable();
+            $table->string('pdf_es')->nullable();
+            $table->string('pdf_pt')->nullable();
+
+            $table->string('author_en')->nullable();
+            $table->string('author_es')->nullable();
+            $table->string('author_pt')->nullable();
+
+            $table->string('views_en')->nullable();
+            $table->string('views_es')->nullable();
+            $table->string('views_pt')->nullable();
+
+            $table->string('like_en')->nullable();
+            $table->string('like_es')->nullable();
+            $table->string('like_pt')->nullable();
+
+            $table->string('type')->nullable();
             $table->integer('is_featured')->nullable()->default(0);
             $table->integer('sorting')->nullable()->default(0);
             $table->integer('status')->nullable()->default(1);

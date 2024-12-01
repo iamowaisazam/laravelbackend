@@ -32,6 +32,13 @@ use Illuminate\Support\Facades\Route;
         Route::get('/settings/{id}','SettingController@show');
 		Route::get('/settings','SettingController@index');
 
+        Route::get('/posts','HomeController@posts');
+        Route::get('/categories','HomeController@categories');
+        Route::get('/posts_by_year','HomeController@posts_by_year');
+
+        
+        
+
     });
 
 
