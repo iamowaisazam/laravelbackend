@@ -205,6 +205,7 @@ class HomeController extends Controller
 
         $data = $data->select([
             'posts.id',
+            'posts.slug',
             'categories.title_'.$lang.' as category',
             'posts.title_'.$lang.' as title',
             'posts.short_description_'.$lang.' as short_description',
