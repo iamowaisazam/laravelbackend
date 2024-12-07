@@ -27,13 +27,12 @@ class DatabaseSeeder extends Seeder
     Category::create(['title_en' =>'NOTICIAS','title_es'=>'NOTICIAS','title_pt' => 'NOTICIAS']);
     Category::create(['title_en' =>'TALLER','title_es'=>'TALLER','title_pt' =>'TALLER']);
     Category::create(['title_en' =>'REVISTA','title_es'=>'REVISTA','title_pt'=>'REVISTA']);
-    Category::create(['title_en' =>'NOTICIAS','title_es'=>'NOTICIAS','title_pt' =>'NOTICIAS']);
     Category::create(['title_en' =>'Artículos','title_es' => 'Artículos','title_pt' => 'Artículos']);
     Category::create(['title_en' =>'Congresos','title_es' => 'Congresos','title_pt' => 'Congresos']);
-
     Category::create(['title_en' =>'Eventos','title_es' => 'Eventos','title_pt' => 'Eventos']);
     Category::create(['title_en' =>'Publicaciones','title_es' => 'Publicaciones','title_pt' => 'Publicaciones']);
     Category::create(['title_en' =>'Webinars','title_es' => 'Webinars','title_pt' => 'Webinars']);
+
 
     $types = ['post','pdf'];
 
@@ -47,11 +46,14 @@ class DatabaseSeeder extends Seeder
             $long_description = $faker->paragraph;
             $banner = $faker->imageUrl(1200, 400, 'business', true, 'Faker Banner');
 
-
             $item = [];
             $item['thumbnail_en'] = 'uploads/greybox.png';
             $item['thumbnail_es'] = 'uploads/greybox.png';
             $item['thumbnail_pt'] = 'uploads/greybox.png';
+
+            $item['creater_en'] = 'Administrador';
+            $item['creater_es'] = 'Administrador';
+            $item['creater_pt'] = 'Administrador';
 
             $item['title_en'] = $title;
             $item['title_es'] = $title;

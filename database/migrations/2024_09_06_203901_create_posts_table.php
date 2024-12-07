@@ -41,6 +41,10 @@ return new class extends Migration
             $table->string('pdf_es')->nullable();
             $table->string('pdf_pt')->nullable();
 
+            $table->string('creater_en')->nullable();
+            $table->string('creater_es')->nullable();
+            $table->string('creater_pt')->nullable();
+
             $table->string('author_en')->nullable();
             $table->string('author_es')->nullable();
             $table->string('author_pt')->nullable();

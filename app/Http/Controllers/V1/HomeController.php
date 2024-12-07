@@ -132,6 +132,8 @@ class HomeController extends Controller
             'posts.like_'.$lang.' as like',
 
             'posts.banner_'.$lang.' as banner',
+
+            'posts.creater_'.$lang.' as creater',
             
 
             'posts.is_featured',
@@ -145,6 +147,7 @@ class HomeController extends Controller
         $data = $data->map(function ($item){
            
             $item['thumbnail_prev'] = asset($item['thumbnail']);
+            $item['banner_prev'] = asset($item['banner']);
 
             $existingDate = $item->created_at;
             $date = Carbon::parse($existingDate);

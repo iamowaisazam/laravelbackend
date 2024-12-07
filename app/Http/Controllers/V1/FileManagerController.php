@@ -46,52 +46,71 @@ class FileManagerController extends Controller
     
     }
 
+
       /**
      * Show the profile for a given user.
      */
     public function index(Request $request)
     { 
-        
-        $lang = $request->lang ?? 'en';
-        $sort_by = 'asc';
-        $limit = 100;
 
-     
+        $lang = $request->lang ?? 'en';
+        $sort_by = $request->sort_by ?? 'desc';
+        $order_by = $request->order_by ?? 'id';
+        $limit = $request->limit ?? 10;
+        $page = $request->page ?? 1;
+
+
+        //Query
         $data = FileManager::query();
 
-        if($request->has('search')){
+        if($request->has('search') && $request->search != ''){
             $search = $request->search;
-            $data->where('name', 'like', '%'.$search.'%');
+            $data->where('filemanagers.name','like', '%'.$search.'%');
         }
 
-        if($request->has('sort_by') && $request->sort_by != ''){
-            $sort_by = $request->sort_by;
+        if($request->has('type')){
+            $data->where('type',$request->type);
         }
 
-        if($request->has('order_by') && $request->order_by != null){
-            $data->orderBy($request->order_by,$sort_by);
+        if($request->has('id') && $request->id){
+            $data->where('filemanagers.id',$request->id);
         }
 
-        $total = $data->count();
-       
-        $currentPage = $request->input('page', 1);
-        $offset = ($currentPage - 1) * $limit;
-        $data = $data->limit($limit)->offset($offset)
-        ->select('*')
-        ->get();
+        if($request->has('extension') && $request->extension){
+            $data->where('filemanagers.extension',$request->extension);
+        }
 
-        // $data = $data->map(function ($item){
-        //     $item['thumbnail_prev'] = asset($item['thumbnail']);
+        $total = $data->count(); 
+        $data = $data->limit($limit)
+        ->offset(($page - 1) * $limit)
+        ->orderBy($order_by,$sort_by)
+        ->select([
+            'filemanagers.*',
+        ])->get();
+
+        // $data->map(function ($item){
+        //     if(isset($item['thumbnail'])){
+        //         $item['thumbnail_prev'] = asset($item['thumbnail']);
+        //     }    
         //     return $item;
         // });
 
+        $paginations = [];
+        for ($i=1; $i < ceil($total / $limit); $i++) { 
+          array_push($paginations,$i);    
+        }
+        
         return response()->json([
             'status' => 'success',
             "message" => "Get All Record Successfully",
             "data" =>  [
-                'page' => $currentPage,
                 'total' => $total,
+                'from' => ($page - 1) * $limit + 1,
+                'to' => min($page * $limit, $total),
+                'page' => $page,
+                'last_page' => ceil($total / $limit),
                 'data' => $data,
+                'links' => $paginations,
             ],
         ],200);
 

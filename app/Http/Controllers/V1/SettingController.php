@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\V1;
 
 use App\Http\Controllers\Controller;
+use App\Models\Newsletter;
 use App\Models\Post;
 use App\Models\Setting;
 use App\Models\Slider;
@@ -91,6 +92,95 @@ class SettingController extends Controller
             ],401);
         }
 
+    }
+
+
+    public function newsletter_list(Request $request)
+    { 
+        $sort_by = $request->sort_by ?? 'desc';
+        $order_by = $request->order_by ?? 'id';
+        $limit = $request->limit ?? 10;
+        $page = $request->page ?? 1;
+
+        //Query
+        $data = Newsletter::query();
+
+        if($request->has('search') && $request->search != ''){
+            $search = $request->search;
+            $data->where('newsletters.name', 'like' , '%'.$search.'%')
+            ->orWhere('newsletters.email','like' , '%'.$search.'%');
+        }
+
+        if($request->has('id') && $request->id){
+            $data->where('newsletters.id',$request->id);
+        }
+
+        if($request->has('email') && $request->email){
+            $data->where('newsletters.email',$request->email);
+        }
+
+        $total = $data->count(); 
+        $data = $data->limit($limit)
+        ->offset(($page - 1) * $limit)
+        ->orderBy($order_by,$sort_by)
+        ->select([
+            'newsletters.id',
+            'newsletters.name',
+            'newsletters.email',
+            'newsletters.created_at',
+            'newsletters.updated_at'
+        ])->get();
+
+        $paginations = [];
+        for ($i=1; $i < ceil($total / $limit); $i++) { 
+          array_push($paginations,$i);    
+        }
+
+        return response()->json([
+            'status' => 'success',
+            "message" => "Get All Record Successfully",
+            "data" =>  [
+                'total' => $total,
+                'from' => ($page - 1) * $limit + 1,
+                'to' => min($page * $limit, $total),
+                'page' => $page,
+                'last_page' => ceil($total / $limit),
+                'data' => $data,
+                'links' => $paginations,
+            ],
+        ],200);
+
+    }
+
+    public function newsletter_add(Request $request )
+    {
+        $news = Newsletter::where('email',$request->email)->get();
+        if(count($news) > 0){
+            return response()->json([
+                'status' => 'error',
+                "message" => "Email Already Added",
+            ],401);
+        }
+
+        $news = Newsletter::create([
+            'name' => $request->name,
+            'email' => $request->email,
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            "message" => "Email Added Successfully",
+        ],200);
+
+    }
+
+    public function newsletter_remove(Request $request )
+    {
+        $news = Newsletter::where('id',$request->id)->delete();
+        return response()->json([
+            'status' => 'success',
+            "message" => "Record Deleted Successfully",
+        ],200);
     }
     
 

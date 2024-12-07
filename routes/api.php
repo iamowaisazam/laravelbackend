@@ -36,33 +36,26 @@ use Illuminate\Support\Facades\Route;
         Route::get('/categories','HomeController@categories');
         Route::get('/posts_by_year','HomeController@posts_by_year');
 
-        
-        
-
+        Route::get('/newsletter_list','SettingController@newsletter_list');
+		Route::get('/newsletter_add','SettingController@newsletter_add');
+        Route::get('/newsletter_remove','SettingController@newsletter_remove');
     });
 
 
     // Admin Panel
     Route::prefix('admin')->namespace('App\Http\Controllers\V1')->group(function () {
 
-        Route::apiResource('settings','SettingController');
-        
-        //Profile
         Route::get('/profile','ProfileController@profile');
-        // Route::post('/profile/update','ProfileController@profile');
         Route::get('/logout', 'ProfileController@logout');
 
-        //Products Management  
-        // Route::get('/products/action','ProductController@action');
-        // Route::get('/products/search','ProductController@search');
-        Route::apiResource('sliders','SliderController');
+        Route::get('posts/pdf','PostController@pdf');
+        Route::get('posts/post','PostController@index');
         Route::apiResource('posts','PostController');
 
         Route::get('filemanagers/search','FileManagerController@search');
         Route::apiResource('filemanagers','FileManagerController');
         Route::apiResource('settings','SettingController');
 
-          
         // Route::post('filemanagers/update/{id}', 'FileManagerController@update');
         // Route::get('filemanagers/file/{id}', 'FileManagerController@get');
         // Route::post('filemanagers/store', 'FileManagerController@store');

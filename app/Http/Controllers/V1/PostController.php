@@ -11,124 +11,182 @@ use Illuminate\Support\Str;
 class PostController extends Controller
 {
 
-  
 
-
-      /**
-     * Show the profile for a given user.
-     */
-    public function index(Request $request)
+    public function pdf(Request $request)
     { 
-        
-        $lang = $request->lang ?? 'en';
-        $sort_by = 'asc';
-        $limit = 10;
+        // dd($request->all());
 
-     
+        $lang = $request->lang ?? 'en';
+        $sort_by = $request->sort_by ?? 'desc';
+        $order_by = $request->order_by ?? 'id';
+        $limit = $request->limit ?? 10;
+        $page = $request->page ?? 1;
+
+
+        //Query
         $data = Post::query();
 
-        if($request->has('search')){
+        if($request->has('type')){
+            $data->where('posts.type','pdf');
+        }
+
+        if($request->has('search') && $request->search != ''){
             $search = $request->search;
-            $data->where('title', 'like', '%'.$search.'%');
+            $data->where('posts.title_'.$lang, 'like', '%'.$search.'%')
+            ->orWhere('posts.author_'.$lang, 'like', '%'.$search.'%');
         }
 
-        if($request->has('sort_by') && $request->sort_by != ''){
-            $sort_by = $request->sort_by;
+        if($request->has('id') && $request->id){
+            $data->where('posts.id',$request->id);
         }
 
-        if($request->has('order_by') && $request->order_by != null){
-            $data->orderBy($request->order_by,$sort_by);
+        if($request->has('slug') && $request->slug){
+            $data->where('posts.slug',$request->slug);
         }
 
+        if($request->has('category') && $request->category){
+            $data->where('posts.category_id',$request->category);
+        }
 
-        $total = $data->count();
-       
-        $currentPage = $request->input('page', 1);
-        $offset = ($currentPage - 1) * $limit;
-        $data = $data->limit($limit)->offset($offset)
+        $total = $data->count(); 
+        $data = $data->limit($limit)
+        ->offset(($page - 1) * $limit)
+        ->orderBy($order_by,$sort_by)
         ->select([
-            'id',
-            'title_'.$lang.' as title',
-            'short_description_'.$lang.' as short_description',
-            'long_description_'.$lang.' as long_description',
-            'thumbnail_'.$lang.' as thumbnail',
-            'is_featured',
-            'status',
-            'created_at',
-            'updated_at'
+            'posts.id',
+            'posts.slug',
+            'posts.title_'.$lang.' as title',
+            'posts.short_description_'.$lang.' as short_description',
+            'posts.long_description_'.$lang.' as long_description',
+            'posts.thumbnail_'.$lang.' as thumbnail',
+            'posts.pdf_'.$lang.' as pdf',
+            'posts.author_'.$lang.' as author',
+            'posts.views_'.$lang.' as views',
+            'posts.like_'.$lang.' as like',
+            'posts.banner_'.$lang.' as banner',
+            'posts.creater_'.$lang.' as creater',
+            'posts.is_featured',
+            'posts.status',
+            'posts.type',
+            'posts.created_at',
+            'posts.updated_at'
         ])->get();
 
-        $data = $data->map(function ($item){
-            $item['thumbnail_prev'] = asset($item['thumbnail']);
+        $data->map(function ($item){
+            if(isset($item['thumbnail'])){
+                $item['thumbnail_prev'] = asset($item['thumbnail']);
+            }    
             return $item;
         });
+
+        $paginations = [];
+        for ($i=1; $i < ceil($total / $limit); $i++) { 
+          array_push($paginations,$i);    
+        }
 
         return response()->json([
             'status' => 'success',
             "message" => "Get All Record Successfully",
             "data" =>  [
-                'page' => $currentPage,
                 'total' => $total,
+                'from' => ($page - 1) * $limit + 1,
+                'to' => min($page * $limit, $total),
+                'page' => $page,
+                'last_page' => ceil($total / $limit),
                 'data' => $data,
+                'links' => $paginations,
             ],
         ],200);
 
     }
 
-     /*
+    /**
      * Show the profile for a given user.
      */
-    public function store(Request $request)
-    {
-        $validator = Validator::make($request->all(),
-        [
-            'title' => ['required','max:100'],
-            'thumbnail' => ['nullable','max:100'],
-            'short_description' => ['required','max:300'],
-            'long_description' => ['nullable','max:1000'],
-            'type' => ['required','max:300'],
-            'featured' => ['required','integer','max:300'],
-            'sorting' => ['nullable','integer','max:300'],
-            'status' => ['required','integer','max:300'],
-            'lang' => ['required','in:en,es,pt','max:300'],
-        ]);
+    public function index(Request $request)
+    { 
 
-        if($validator->fails()){
-            return response()->json([
-                "status" => "error",
-                "message" => "Validation Failed",
-                "errors" =>  $validator->messages(),
-            ],403);
+        $lang = $request->lang ?? 'en';
+        $sort_by = $request->sort_by ?? 'desc';
+        $order_by = $request->order_by ?? 'id';
+        $limit = $request->limit ?? 10;
+        $page = $request->page ?? 1;
+
+        //Query
+        $data = Post::Leftjoin('categories','categories.id','=','posts.category_id');
+
+        if($request->has('type')){
+            $data->where('posts.type','post');
         }
 
-        $lang = $request->lang;
+        if($request->has('search') && $request->search != ''){
+            $search = $request->search;
+            $data->where('posts.title_'.$lang, 'like', '%'.$search.'%')
+            ->orWhere('categories.title_'.$lang, 'like', '%'.$search.'%');
+        }
 
+        if($request->has('id') && $request->id){
+            $data->where('posts.id',$request->id);
+        }
 
-        $slug = strtolower($request->title);
-        $slug = preg_replace('/[^a-z0-9-]/', ' ', $slug);
-        $slug = preg_replace('/\s+/', '-', $slug);
-        $slug = trim($slug, '-');
+        if($request->has('slug') && $request->slug){
+            $data->where('posts.slug',$request->slug);
+        }
 
-        $module = new Post();
-        $module->slug = $slug;
+        if($request->has('category') && $request->category){
+            $data->where('posts.category_id',$request->category);
+        }
 
-        $module->{"title_" . $lang} = $request->title;
-        $module->{"short_description_" . $lang} = $request->short_description;
-        $module->{"long_description_" . $lang} = $request->long_description;
-        $module->{"thumbnail_" . $lang} = $request->thumbnail;
-        $module->sorting = $request->sorting;
-        $module->type = 'post';
-        $module->is_featured = $request->featured;
-        $module->status = $request->status;
-        $module->save();
+        $total = $data->count(); 
+        $data = $data->limit($limit)
+        ->offset(($page - 1) * $limit)
+        ->orderBy($order_by,$sort_by)
+        ->select([
+            'posts.id',
+            'posts.slug',
+            'categories.title_'.$lang.' as category',
+            'posts.title_'.$lang.' as title',
+            'posts.short_description_'.$lang.' as short_description',
+            'posts.long_description_'.$lang.' as long_description',
+            'posts.thumbnail_'.$lang.' as thumbnail',        
+            'posts.is_featured',
+            'posts.status',
+            'posts.type',
+            'posts.category_id',
+            'posts.created_at',
+            'posts.updated_at'
+        ])->get();
+
+        $data->map(function ($item){
+            if(isset($item['thumbnail'])){
+                $item['thumbnail_prev'] = asset($item['thumbnail']);
+            }    
+            return $item;
+        });
+
+        $paginations = [];
+        for ($i=1; $i < ceil($total / $limit); $i++) { 
+          array_push($paginations,$i);    
+        }
 
         return response()->json([
-            "message" => "Record Created Successfully",
-            "data" => ['id' => $module->id]
+            'status' => 'success',
+            "message" => "Get All Record Successfully",
+            "data" =>  [
+                'total' => $total,
+                'from' => ($page - 1) * $limit + 1,
+                'to' => min($page * $limit, $total),
+                'page' => $page,
+                'last_page' => ceil($total / $limit),
+                'data' => $data,
+                'links' => $paginations,
+            ],
         ],200);
 
-
     }
+
+
+
 
 
     /*
@@ -137,45 +195,63 @@ class PostController extends Controller
     public function update(Request $request,$id)
     {
 
-        $module = Post::where('id',$id)->first();
-        if(!$module){
-            return response()->json(["message" => "Record Not Found"],403);
-        }
-
-        $validator = Validator::make($request->all(),
-        [
-            'title' => ['required','max:100'],
-            'thumbnail' => ['nullable','max:100'],
-            'short_description' => ['required','max:300'],
-            'long_description' => ['nullable','max:1000'],
-            'type' => ['required','max:300'],
-            'sorting' => ['nullable','integer','max:300'],
-            'featured' => ['required','integer','max:300'],
-            'status' => ['required','integer','max:300'],
-            'lang' => ['required','in:en,es,pt','max:300'],
-        ]);
-
-        if($validator->fails()){
-            return response()->json([
-                "status" => "error",
-                "message" => "Validation Failed",
-                "errors" =>  $validator->messages(),
-            ],403);
-        }
-
         $lang = $request->lang ?? 'en';
+        $module = Post::where('id',$id)->first();
+        if($module == false){
+             $module = new Post();
+        }
 
-        $module->{"title_" . $lang} = $request->title;
-        $module->{"short_description_" . $lang} = $request->short_description;
-        $module->{"long_description_" . $lang} = $request->long_description;
-        $module->{"thumbnail_" . $lang} = $request->thumbnail;
-        
-        // $module->sorting = $request->sorting;
-        // $module->type = 'post';
+        if($request->has('title')){
+            $module->{"title_" . $lang} = $request->title;
+            $slug = strtolower($request->title);
+            $slug = preg_replace('/[^a-z0-9-]/', ' ', $slug);
+            $slug = preg_replace('/\s+/', '-', $slug);
+            $slug = trim($slug, '-');
+            $module->slug = $slug;
+        }
 
-        $module->is_featured = $request->featured;
-        $module->status = $request->status;
+        if($request->has('short_description')){
+            $module->{"short_description_" . $lang} = $request->short_description;
+        }
+
+        if($request->has('long_description')){
+            $module->{"long_description_" . $lang} = $request->long_description;
+        }
+
+        if($request->has('thumbnail')){
+            $module->{"thumbnail_" . $lang} = $request->thumbnail;
+        }
+
+        if($request->has('banner')){
+            $module->{"banner_" . $lang} = $request->banner;
+        }
+
+        if($request->has('creater')){
+            $module->{"creater_" . $lang} = $request->creater;
+        }
+
+        if($request->has('author')){
+            $module->{"author_" . $lang} = $request->author;
+        }
+
+        if($request->has('pdf')){
+            $module->{"pdf_" . $lang} = $request->pdf;
+        }
+
+        if($request->has('status')){
+            $module->status = $request->status;
+        }
+
+        if($request->has('featured')){
+            $module->is_featured = $request->featured;
+        }
+
+       
+
         
+
+
+        $module->type = $request->type;
         $module->save();
 
         return response()->json([
@@ -183,27 +259,6 @@ class PostController extends Controller
             "data" => ['id' => $module->id]
         ],200);
 
-    }
-
-    public function show($id,Request $request )
-    {
-        $lang = $request->lang ?? 'en';
-
-        $slider = Post::select([
-            'id',
-            'title_'.$lang.' as title',
-            'short_description_'.$lang.' as short_description',
-            'long_description_'.$lang.' as long_description',
-            'thumbnail_'.$lang.' as thumbnail',
-            'is_featured',
-            'status',
-            'created_at',
-            'updated_at'
-        ])->where('id',$id)->first();       
-        return response()->json([
-            "message" => 'Get Record Successfully',
-            "data" => $slider,
-        ],200);
     }
 
 
@@ -226,5 +281,6 @@ class PostController extends Controller
     }
 
 
+ 
     
 }
